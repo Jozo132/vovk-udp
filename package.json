@@ -1,0 +1,23 @@
+{
+  "name": "vovk-udp",
+  "version": "0.0.0",
+  "description": "Simplified UDP library based on 'dgram'",
+  "main": "vovk-udp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jozo132/vovk-udp.git"
+  },
+  "keywords": [
+    "node",
+    "udp"
+  ],
+  "author": "J.Vovk - jozo132@gmail.com",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/Jozo132/vovk-udp/issues"
+  },
+  "homepage": "https://github.com/Jozo132/vovk-udp#readme"
+}
