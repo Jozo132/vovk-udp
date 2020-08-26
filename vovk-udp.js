@@ -8,9 +8,9 @@ const { isArray } = Array
 /** @typedef { String | ArrayBuffer | SharedArrayBuffer } UDP_messageInput Acceptable UDP message input format */
 /** @typedef { ArrayBuffer | SharedArrayBuffer } UDP_messageOutput Acceptable UDP message output format */
 /** @typedef {{ message: UDP_messageInput, latency: Number }} UDP_sendResponse UDP promise response format of the 'send' command */
-/** @typedef {{ message: UDP_messageOutput, request: UDP_messageInput, latency: Number }} UDP_requestResponse UDP promise response format of the 'request' command */
+/** @typedef {{ message: UDP_messageOutput, request: UDP_messageInput, reply: (message: UDP_messageInput) => Promise<UDP_requestResponse>, latency: Number }} UDP_requestResponse UDP promise response format of the 'request' command */
 /** @typedef {{ address: String, port: Number, message: UDP_messageOutput }} UDP_ClientData UDP Client event message data */
-/** @typedef { (UDP_messageInput) => Promise<UDP_messageOutput> } UDP_ClientCallback UDP Client callback function to reply to the given request */
+/** @typedef { (message: UDP_messageInput) => Promise<UDP_messageOutput> } UDP_ClientCallback UDP Client callback function to reply to the given request */
 
 
 /** @param { UDP_messageInput } message * @param { UDP_Socket } socket * @param { String } address * @param { Number } port * @returns { Promise } UDP Reply Promise */
@@ -126,17 +126,18 @@ const send = (host, port, input, timeout) => new Promise((resolve, reject) => {
 const request = (host, port, input, timeout) => new Promise((resolve, reject) => {
     try {
         const startTime = +new Date();
-        const request = Buffer.from(input)
+        const req = Buffer.from(input)
         const UDP_sender = dgram.createSocket('udp4');
         const _timeout = setTimeout(() => closeConnection('timeout'), timeout > 0 && timeout < Infinity ? timeout : 1000)
         const closeConnection = (e) => { clearTimeout(_timeout); if (e) reject(`UDP request error: ${e.toString()}`); try { UDP_sender.close() } catch (e) { } }
-        UDP_send(request, UDP_sender, host, port).catch(err => {
+        UDP_send(req, UDP_sender, host, port).catch(err => {
             closeConnection(err)
             reject(err)
         })
         UDP_sender.on('message', (message, remote) => {
             closeConnection()
-            resolve({ message, request, latency: +new Date - startTime })
+            const reply = outgoing => request(remote.address, remote.port, outgoing, timeout)
+            resolve({ message, request: req, reply, latency: +new Date - startTime })
         })
         UDP_sender.on('error', err => {
             closeConnection(err)
