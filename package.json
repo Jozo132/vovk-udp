@@ -1,6 +1,6 @@
 {
   "name": "vovk-udp",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Simplified UDP library based on 'dgram'",
   "main": "vovk-udp.js",
   "scripts": {
